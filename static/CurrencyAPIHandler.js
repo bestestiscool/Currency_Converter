@@ -10,17 +10,34 @@ async function convertCurrency() {
             to_currency: toCurrency,
             amount: amount
         });
-         // Handle the response from your Flask app
+        
+        // Handle the response from your Flask app
         if (response.data.result) {
-            document.getElementById('result').innerHTML = `Converted Amount: ${response.data.result}`;
+            const resultElement = document.getElementById('result');
+            resultElement.style.display = 'block';  // Make the result element visible
+            resultElement.textContent = '';  // Clear any previous content
+
+            // Create a new label element for the converted amount
+            const convertedLabel = document.createElement('label');
+            convertedLabel.textContent = 'Converted:';
+            convertedLabel.setAttribute('for', 'converted-amount');
+            
+            // Create a span that will hold the converted amount
+            const convertedAmountSpan = document.createElement('span');
+            convertedAmountSpan.id = 'converted-amount';
+            convertedAmountSpan.textContent = `${response.data.result}`;
+
+            // Append the label and the amount span to the result div
+            resultElement.appendChild(convertedLabel);
+            resultElement.appendChild(convertedAmountSpan);
         } else {
             // If the Flask app returns an error key in the JSON response
-            document.getElementById('result').innerHTML = 'Conversion failed. Please try again.';
+            document.getElementById('result').textContent = 'Conversion failed. Please try again.';
         }
     } catch (error) {
         // Log the error and show it on the webpage
         console.error('Error during the conversion:', error);
-        document.getElementById('result').innerHTML = 'An error occurred during conversion. ' + (error.response ? error.response.data.error : error.message);
+        document.getElementById('result').textContent = 'An error occurred during conversion. ' + (error.response ? error.response.data.error : error.message);
     }
 }
 
