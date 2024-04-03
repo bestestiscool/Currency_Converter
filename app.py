@@ -37,19 +37,20 @@ def convert_currency():
         response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
 
         response_data = response.json()
-        print('>>>>>>>>>>>>', response_data)  # Print the whole JSON response for debugging
         quotes = response_data.get('quotes')
-        print(">>>>>>>>>>>>>>>>>>>>>>>>",quotes)
-        breakpoint()
+
+        # breakpoint()
         if quotes:
-            exchange_quote = quotes.get(to_currency)
+            exchange_quote = next(iter(quotes.values()))
             if exchange_quote:
+                # Multiply the exchange rate by the amount the user wants to convert
                 converted_amount = amount * exchange_quote
                 return jsonify({'result': converted_amount})
             else:
-                return jsonify({'error': f'No exchange quote found for {to_currency}.'}), 400
+                return jsonify({'error': 'Exchange rate not found.'}), 400
         else:
-            return jsonify({'error': 'No quotes found in the response.'}), 400
+            return jsonify({'error': 'No quotes found in the response.'}), 400 
+
 
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
