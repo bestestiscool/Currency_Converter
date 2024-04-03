@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify, render_template
 import requests
-
+from secret_api_key import API_KEY
 
 app = Flask(__name__)
 app.app_context().push()
 
-API_KEY = 'a406db0aef80db099770666d6317b4fb'
-
+print(API_KEY + '>>>>>>>>>>>>>>>>>>>>>>>')
 
 @app.route('/')
 def index():
@@ -20,24 +19,41 @@ def convert_currency():
 
     from_currency = data.get('from_currency')
     to_currency = data.get('to_currency')
-    amount = data.get('amount')
+    amount = float(data.get('amount'))
 
-    # Make sure you handle any exceptions that might occur and return appropriate error messages
+    print('>>>>>>>>>>>>>>>>', from_currency, to_currency, amount)
+    # breakpoint()
+        # Make sure you handle any exceptions that might occur and return appropriate error messages
     try:
         response = requests.get(
-            'https://api.exchangerate.host/convert',
+            'http://api.exchangerate.host/live',
             params={
-                'from': from_currency,
-                'to': to_currency,
-                'amount': amount,
-                'apikey': API_KEY  # If the API requires the key as a query parameter
+                'access_key': API_KEY,  # Include your API key in the request parameters.
+                'source': from_currency,
+                'currencies': to_currency
+                
             }
         )
         response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
+
+        response_data = response.json()
+        print('>>>>>>>>>>>>', response_data)  # Print the whole JSON response for debugging
+        quotes = response_data.get('quotes')
+        print(">>>>>>>>>>>>>>>>>>>>>>>>",quotes)
+        breakpoint()
+        if quotes:
+            exchange_quote = quotes.get(to_currency)
+            if exchange_quote:
+                converted_amount = amount * exchange_quote
+                return jsonify({'result': converted_amount})
+            else:
+                return jsonify({'error': f'No exchange quote found for {to_currency}.'}), 400
+        else:
+            return jsonify({'error': 'No quotes found in the response.'}), 400
+
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
-    return jsonify(response.json())
-
 if __name__ == '__main__':
     app.run(debug=True)
+

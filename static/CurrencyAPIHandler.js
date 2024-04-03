@@ -1,40 +1,30 @@
-function convertCurrency() {
+async function convertCurrency() {
     const fromCurrency = document.getElementById('from').value.toUpperCase();
     const toCurrency = document.getElementById('to').value.toUpperCase();
     const amount = document.getElementById('amount').value;
 
-    // Make a POST request to your Flask backend
-    fetch('/convert', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+    try {
+        // POST to the Flask `/convert` route which handles the conversion server-side
+        const response = await axios.post('/convert', {
             from_currency: fromCurrency,
             to_currency: toCurrency,
             amount: amount
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.result) {
-            document.getElementById('result').innerHTML = `Converted Amount: ${data.result}`;
+        });
+         // Handle the response from your Flask app
+        if (response.data.result) {
+            document.getElementById('result').innerHTML = `Converted Amount: ${response.data.result}`;
         } else {
+            // If the Flask app returns an error key in the JSON response
             document.getElementById('result').innerHTML = 'Conversion failed. Please try again.';
         }
-    })
-    .catch(error => {
-        console.error('Error during conversion:', error);
-        document.getElementById('result').innerHTML = 'An error occurred during conversion.';
-    });
+    } catch (error) {
+        // Log the error and show it on the webpage
+        console.error('Error during the conversion:', error);
+        document.getElementById('result').innerHTML = 'An error occurred during conversion. ' + (error.response ? error.response.data.error : error.message);
+    }
 }
 
-// Attach the event listener to the button
+// Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const convertButton = document.getElementById('convert-button');
     if (convertButton) {
