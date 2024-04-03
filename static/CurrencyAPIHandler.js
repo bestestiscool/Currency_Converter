@@ -1,7 +1,31 @@
 async function convertCurrency() {
-    const fromCurrency = document.getElementById('from').value.toUpperCase();
-    const toCurrency = document.getElementById('to').value.toUpperCase();
+    const fromCurrency = document.getElementById('from').value.toUpperCase().trim();
+    const toCurrency = document.getElementById('to').value.toUpperCase().trim();
     const amount = document.getElementById('amount').value;
+
+    // Clear previous results
+    const resultElement = document.getElementById('result');
+    resultElement.textContent = '';
+    resultElement.style.display = 'none';
+
+    // Check if the currencies are valid (e.g., not empty and are three letters long)
+    if (!fromCurrency || fromCurrency.length !== 3) {
+        resultElement.textContent = 'Please enter a valid "From" currency code.';
+        resultElement.style.display = 'block';
+        return;
+    }
+    if (!toCurrency || toCurrency.length !== 3) {
+        resultElement.textContent = 'Please enter a valid "To" currency code.';
+        resultElement.style.display = 'block';
+        return;
+    }
+
+    // Check if the amount is valid (greater than 0)
+    if (isNaN(amount) || amount <= 0) {
+        resultElement.textContent = 'Please enter an amount greater than 0.';
+        resultElement.style.display = 'block';
+        return;
+    }
 
     try {
         // POST to the Flask `/convert` route which handles the conversion server-side
@@ -13,35 +37,20 @@ async function convertCurrency() {
         
         // Handle the response from your Flask app
         if (response.data.result) {
-            const resultElement = document.getElementById('result');
-            resultElement.style.display = 'block';  // Make the result element visible
-            resultElement.textContent = '';  // Clear any previous content
-
-            // Create a new label element for the converted amount
-            const convertedLabel = document.createElement('label');
-            convertedLabel.textContent = 'Converted:';
-            convertedLabel.setAttribute('for', 'converted-amount');
-            
-            // Create a span that will hold the converted amount
-            const convertedAmountSpan = document.createElement('span');
-            convertedAmountSpan.id = 'converted-amount';
-            convertedAmountSpan.textContent = `${response.data.result}`;
-
-            // Append the label and the amount span to the result div
-            resultElement.appendChild(convertedLabel);
-            resultElement.appendChild(convertedAmountSpan);
+            resultElement.textContent = `Converted: ${response.data.result}`;
+            resultElement.style.display = 'block';
         } else {
-            // If the Flask app returns an error key in the JSON response
-            document.getElementById('result').textContent = 'Conversion failed. Please try again.';
+            resultElement.textContent = 'Conversion failed. Please try again.';
+            resultElement.style.display = 'block';
         }
     } catch (error) {
         // Log the error and show it on the webpage
         console.error('Error during the conversion:', error);
-        document.getElementById('result').textContent = 'An error occurred during conversion. ' + (error.response ? error.response.data.error : error.message);
+        resultElement.textContent = 'An error occurred during conversion. ' + (error.response ? error.response.data.error : error.message);
+        resultElement.style.display = 'block';
     }
 }
 
-// Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const convertButton = document.getElementById('convert-button');
     if (convertButton) {

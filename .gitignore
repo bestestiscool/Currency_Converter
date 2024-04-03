@@ -17,3 +17,5 @@ build/
 package-lock.json
 
 package.json
+
+nodes_modules

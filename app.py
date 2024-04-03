@@ -21,6 +21,10 @@ def convert_currency():
     to_currency = data.get('to_currency')
     amount = float(data.get('amount'))
 
+    # If from_currency and to_currency are the same, return a response with an empty list for 'result'
+    if from_currency == to_currency:
+        return jsonify({'result': []}), 200
+
     try:
         response = requests.get(
             'http://api.exchangerate.host/live',
@@ -35,8 +39,8 @@ def convert_currency():
 
         response_data = response.json()
         quotes = response_data.get('quotes')
-        print('>>>>>>>>>>>>>>>>>>>>>>>>This is the quote', quotes)
-        # breakpoint()
+        print(f">>>>>>>>>>>>> {quotes}")
+        breakpoint()
         if quotes:
             exchange_quote = next(iter(quotes.values()))
             if exchange_quote:
