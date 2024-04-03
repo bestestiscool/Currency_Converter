@@ -57,3 +57,5 @@ document.addEventListener('DOMContentLoaded', function() {
         convertButton.addEventListener('click', convertCurrency);
     }
 });
+
+// Basic idea of conversion
